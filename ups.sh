@@ -11,12 +11,18 @@ fi
 timestamp=$( date +%T )
 status=$( upsc $user@$ups:$port 2>&1 ups.status | grep -v '^Init SSL' )
 if [ "$status" = "OL" ]; then
-   if [ "$1" = "-v" ]; then echo Power is on... yay!
+   if [ "$1" = "-v" ]; then echo "Power is on... yay!"
    fi
    exit 1
-else
+elif [ "$status" = "OB" ]; then
 # Typical of me, I am not sure about having it shutdown, so it is echoed. I've been having data stale problems.
-   echo "shutdown -P" | mail -s "Is the power out?!" ubuntu
+   if [ "$1" = "-v" ]; then echo "On battery"
+   # echo "shutdown -P" | mail -s "Is the power out?!" ubuntu
+   exit 1
+else
+   echo "Restarting UPS Daemon!"
+   echo /home/ubuntu/resetups.sh
+   exit 0
 fi
 # if the power is out... ask for percentaget of battery
 batt=$( upsc $user@$ups:$port battery.charge 2>&1 | grep -v '^Init SSL' )
