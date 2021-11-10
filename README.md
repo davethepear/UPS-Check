@@ -28,3 +28,4 @@ your user name and directory could be different!
 - nut
 - nut-server
 - nut-client
+- postfix for email, maybe not a necessity
