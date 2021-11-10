@@ -1,4 +1,5 @@
 #!/bin/sh
+job=server # client OR server - is this a client only or is it on the server?
 ups=192.168.0.12 # the ip or hostname of the nut server
 port=3493 # the port used, especially through a firewall
 user=servers # user name, set in upsd.users
@@ -34,6 +35,7 @@ elif [ "$status" = "OB" ]; then
        exit 0
    fi
 else
+   if [ "$job" = "client" ]; then exit 1; fi
    echo "Restarting UPS Daemon!"
    /usr/bin/usbreset $pv
    /usr/bin/systemctl restart nut-driver
