@@ -13,7 +13,7 @@ if [ "$?" = "1" ]; then
     exit 1
 fi
 timestamp=$( date +%T )
-upsstatus=$(upsc servers@192.168.0.12:3493 2>&1 | grep -v '^Init SSL' | grep -E 'ups.status:|battery.charge:')
+upsstatus=$(upsc $user@$ups:$port 2>&1 | grep -v '^Init SSL' | grep -E 'ups.status:|battery.charge:')
 status=$(echo "$upsstatus" | grep "ups.status:" | awk '{ print $2 }')
 batt=$(echo "$upsstatus" | grep "battery.charge:" | awk '{ print $2 }')
 if [ "$status" = "OL" ]; then
