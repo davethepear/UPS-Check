@@ -5,6 +5,7 @@ port=3493 # the port used, especially through a firewall
 user=servers # user name, set in upsd.users
 pv=0764:0501 # product and vendor id of the ups
 battlev=95 # the percentage of battery left before shutdown or whatever occurs
+emailme=yes # yes OR no - do you want it to email you?
 email=ubuntu # or your email addy, I use local mail
 # read the readme?
 
@@ -31,13 +32,14 @@ elif [ "$status" = "OB" ]; then
       exit 0
    else
    # Again, the shutdown it echoed, but it emails me. Luckily the power's stayed on and I'm too lazy to unplug it.
-       echo "shutdown -P" | mail -s "Is the power out? There is $batt percent left!" ubuntu
+       if [ "emailme" = "yes" ]; then  echo "shutdown -P" | mail -s "Is the power out? The battery has $batt percent left!" ubuntu ; fi
        exit 0
    fi
 else
    if [ "$job" = "client" ]; then exit 1; fi
-   echo "Restarting UPS Daemon!"
+   if [ "$1" = "-v" ]; then echo "Restarting UPS Daemon!"; fi
    /usr/bin/usbreset $pv
-   /usr/bin/systemctl restart nut-driver
+   if [ "emailme" = "no" ]; then /usr/bin/systemctl restart nut-driver 2>&1 ; fi
+   if [ "emailme" = "yes" ]; then /usr/bin/systemctl restart nut-driver ; fi
    exit 1
 fi
