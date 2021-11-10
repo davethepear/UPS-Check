@@ -1,16 +1,13 @@
 #!/bin/sh
 ups=192.168.0.12 # the ip or hostname of the nut server
 port=3493 # the port used, especially through a firewall
-user=servers #user name, set in upsd.users
+user=servers # user name, set in upsd.users
 pv=0764:0501 # product and vendor id of the ups
-# if the command: "upsc servers@192.168.0.12:3493 ups.status" works, we're good.
-# yeah, your ip address and user name may be different... does it really need to be said?
-# find product and vendor id by typing sudo usbreset, it will look the same as the example.
-# this needs to be in root's crontab if you want the auto reset on the stale data bs.
+# read the readme?
 
 nc -z $ups $port > /dev/null
 if [ "$?" = "1" ]; then
-    echo "are you sure you have the right address and port? maybe the user is wrong?"
+    echo "Error: Server offline, wrong address and/or port, maybe the user is wrong?"
     exit 1
 fi
 timestamp=$( date +%T )
