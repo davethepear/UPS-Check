@@ -23,6 +23,10 @@ sudo crontab -e
 ```
 your user name and directory could be different!
 
+if you don't want to see when it restarts the driver or other stuff:
+```
+*/2 * * * * /home/user/scripts/ups.sh >/dev/null 2>&1
+```
 
 ### Requirements
 - nut
