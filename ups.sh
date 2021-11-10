@@ -1,7 +1,12 @@
 #!/bin/sh
-ups=192.168.0.12
-port=3493
-user=servers
+ups=192.168.0.12 # the ip or hostname of the nut server
+port=3493 # the port used, especially through a firewall
+user=servers #user name, set in upsd.users
+pv=0764:0501 # product and vendor id of the ups
+# if the command: "upsc servers@192.168.0.12:3493 ups.status" works, we're good.
+# yeah, your ip address and user name may be different... does it really need to be said?
+# find product and vendor id by typing sudo usbreset, it will look the same as the example.
+# this needs to be in root's crontab if you want the auto reset on the stale data bs.
 
 nc -z $ups $port > /dev/null
 if [ "$?" = "1" ]; then
@@ -11,17 +16,17 @@ fi
 timestamp=$( date +%T )
 status=$( upsc $user@$ups:$port 2>&1 ups.status | grep -v '^Init SSL' )
 if [ "$status" = "OL" ]; then
-   if [ "$1" = "-v" ]; then echo "Power is on... yay!"
-   fi
+   if [ "$1" = "-v" ]; then echo "Power is on... yay!"; fi
    exit 1
 elif [ "$status" = "OB" ]; then
 # Typical of me, I am not sure about having it shutdown, so it is echoed. I've been having data stale problems.
-   if [ "$1" = "-v" ]; then echo "On battery"
+   if [ "$1" = "-v" ]; then echo "On battery"; fi
    # echo "shutdown -P" | mail -s "Is the power out?!" ubuntu
    exit 1
 else
-   echo "Restarting UPS Daemon!"
-   echo /home/ubuntu/resetups.sh
+   if [ "$1" = "-v" ]; then echo "Restarting UPS Daemon!"; fi
+   /usr/bin/usbreset $pv
+   /usr/bin/systemctl restart nut-driver
    exit 0
 fi
 # if the power is out... ask for percentaget of battery
