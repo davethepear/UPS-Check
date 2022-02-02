@@ -19,6 +19,10 @@ timestamp=$( date +%T )
 upsstatus=$(upsc $user@$ups:$port 2>&1 | grep -v '^Init SSL' | grep -E 'ups.status:|battery.charge:')
 status=$(echo "$upsstatus" | grep "ups.status:" | awk '{ print $2 }')
 batt=$(echo "$upsstatus" | grep "battery.charge:" | awk '{ print $2 }')
+if [ ! -f $scriptdir/ups-reset-counter.txt ]; then
+   echo "Counter file missing, creating one..."
+   echo "419" > $scriptdir/ups-reset-counter.txt
+fi
 if [ "$status" = "OL" ]; then
    if [ "$1" = "-v" ]; then echo "Power is on... yay!"; fi
    if [ -f "$scriptdir/nomail" ]; then rm $scriptdir/nomail ; fi
@@ -36,7 +40,7 @@ elif [ "$status" = "OB" ]; then
       if [ "$1" = "-v" ]; then  echo "Battery level: $batt%"; fi
       exit 0
    else
-   # Again, the shutdown is echoed, but it emails me. Luckily the power's stayed on and I'm too lazy to unplug it.
+   # Again, the shutdown is echoed, but it emails me. Luckily the power has stayed on and I'm too lazy to unplug it.
        if [ "emailme" = "yes" ]; then echo "shutdown -P" | mail -s "Is the power out? The battery has $batt percent left!" $email ; fi
        # shutdown -P
        exit 0
@@ -47,5 +51,8 @@ else
    /usr/bin/usbreset $pv
    if [ "emailme" = "no" ]; then /usr/bin/systemctl restart nut-driver 2>&1 ; fi
    if [ "emailme" = "yes" ]; then /usr/bin/systemctl restart nut-driver ; fi
-   exit 1
+   counter=$(cat $scriptdir/ups-reset-counter.txt)
+   counter=$((counter+1))
+   echo "$counter" > $scriptdir/ups-reset-counter.txt
+   exit 0
 fi
